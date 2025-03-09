@@ -1,0 +1,9 @@
+{
+  "meta": {
+    "title": "E-Commerce",
+    "description": "E-Commerce website"
+  },
+  "welcome": {
+    "welcome_message": "Welcome to E-Commerce"
+  }
+}
