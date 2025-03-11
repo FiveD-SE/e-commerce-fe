@@ -1,31 +1,65 @@
 import { create } from 'zustand';
-import type { IUser, IRefreshToken, IAccessToken } from '@/types';
 import Cookies from 'js-cookie';
+import { login, getUser } from '@/apis';
 
 interface AuthState {
-  accessToken: IAccessToken | null;
-  refreshToken: IRefreshToken | null;
-  user: IUser | null;
-  setTokens: (accessToken: IAccessToken, refreshToken: IRefreshToken, user: IUser) => void;
-  clearTokens: () => void;
+  isAuthenticated: boolean;
+  role: string;
+  login: (credentials: { email: string; password: string }) => Promise<void>;
+  logout: () => Promise<void>;
+  checkAuth: () => void;  
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
-  accessToken: Cookies.get('accessToken') ? JSON.parse(Cookies.get('accessToken') as string) as IAccessToken : null,
-  refreshToken: Cookies.get('refreshToken') ? JSON.parse(Cookies.get('refreshToken') as string) as IRefreshToken : null,
-  user: JSON.parse(Cookies.get('user') as string) as IUser,
+  isAuthenticated: !!Cookies.get('accessToken'),
+  role: '',
 
-  setTokens: (accessToken: IAccessToken, refreshToken: IRefreshToken, user: any) => {
-    Cookies.set('accessToken', JSON.stringify(accessToken));
-    Cookies.set('refreshToken', JSON.stringify(refreshToken));
-    Cookies.set('user', JSON.stringify(user));
-    set({ accessToken, refreshToken, user });
+  login: async ({ email, password }) => {
+    try {
+       const response = await login(email, password);
+      const user = await getUser(response.data.user.id);
+
+       Cookies.set('accessToken', response.data.accessToken, { expires: 7 });
+
+       set({
+        isAuthenticated: true,
+        role: user.role,
+      });
+    } catch (error: any) {
+      set({
+        isAuthenticated: false,
+        role: '',
+      });
+      throw error.response?.data || error.message;  
+    } 
   },
 
-  clearTokens: () => {
-    Cookies.remove('accessToken');
-    Cookies.remove('refreshToken');
-    Cookies.remove('user');
-    set({ accessToken: null, refreshToken: null, user: null });
+  logout: async () => {
+    try {
+      const refreshToken = Cookies.get('refreshToken');
+      if (!refreshToken) throw new Error('No refresh token found');
+
+      Cookies.remove('accessToken');
+      Cookies.remove('refreshToken');
+
+      set({
+        isAuthenticated: false,
+        role: '',
+      });
+    } catch (error: any) {
+       set({
+        isAuthenticated: false,
+        role: '',
+      });
+      throw error.message; 
+    }
   },
-}));
+
+  checkAuth: () => {
+    const accessToken = Cookies.get('accessToken');
+    set((state) => ({
+      isAuthenticated: !!accessToken,
+      role: accessToken ? state.role : '',  
+    }));
+  },
+}));  

@@ -4,7 +4,7 @@ const localePrefix: LocalePrefix = "as-needed";
 
 export const AppConfig = {
   name: "E-Commerce",
-  locales: ["vi"],
+  locales: ["vi", "en"],
   defaultLocale: "vi",
   localePrefix,
 };
