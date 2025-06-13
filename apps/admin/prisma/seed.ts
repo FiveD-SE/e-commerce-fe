@@ -30,6 +30,8 @@ function getRandomBoolean() {
 const prisma = new PrismaClient()
 
 async function main() {
+   console.log('SEED SCRIPT STARTED')
+   
    let createdProducts = [],
       createdProviders = []
 
