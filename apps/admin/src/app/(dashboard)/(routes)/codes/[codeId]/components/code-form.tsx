@@ -50,17 +50,25 @@ export const CodeForm: React.FC<CodeFormProps> = ({ initialData }) => {
     const toastMessage = initialData ? 'Code updated.' : 'Code created.'
     const action = initialData ? 'Save changes' : 'Create'
 
+    console.log('initialData', initialData)
+
     const form = useForm<CodeFormValues>({
         resolver: zodResolver(formSchema),
-        defaultValues: initialData || {
-            code: '',
-            percent: 1,
-            stock: 1,
-            maxDiscountAmount: 1,
-            startDate: '',
-            endDate: '',
-            description: '',
-        },
+        defaultValues: initialData
+            ? {
+                ...initialData,
+                startDate: initialData.startDate ? new Date(initialData.startDate).toISOString().slice(0, 10) : '',
+                endDate: initialData.endDate ? new Date(initialData.endDate).toISOString().slice(0, 10) : '',
+            }
+            : {
+                code: '',
+                percent: 1,
+                stock: 1,
+                maxDiscountAmount: 1,
+                startDate: '',
+                endDate: '',
+                description: '',
+            },
     })
 
     const onSubmit = async (data: CodeFormValues) => {

@@ -1,29 +1,47 @@
 'use client'
 
-import * as React from 'react'
-import { DialogProps } from '@radix-ui/react-dialog'
-import { SearchIcon } from 'lucide-react'
-import { Command as CommandPrimitive } from 'cmdk'
-
-import { cn } from '@/lib/utils'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
+import { cn } from '@/lib/utils'
+import { DialogProps } from '@radix-ui/react-dialog'
+import { Command as CommandPrimitive } from 'cmdk'
+import { SearchIcon } from 'lucide-react'
+import * as React from 'react'
 
 const Command = React.forwardRef<
    React.ElementRef<typeof CommandPrimitive>,
    React.ComponentPropsWithoutRef<typeof CommandPrimitive>
->(({ className, ...props }, ref) => (
-   <CommandPrimitive
-      ref={ref}
-      className={cn(
-         'flex h-full w-full flex-col overflow-hidden rounded-md bg-popover text-popover-foreground',
-         className
-      )}
-      {...props}
-   />
-))
+>(({ className, ...props }, ref) => {
+   const [mounted, setMounted] = React.useState(false)
+
+   React.useEffect(() => {
+      setMounted(true)
+   }, [])
+
+   if (!mounted) {
+      return (
+         <div
+            className={cn(
+               'flex h-full w-full flex-col overflow-hidden rounded-md bg-popover text-popover-foreground',
+               className
+            )}
+         />
+      )
+   }
+
+   return (
+      <CommandPrimitive
+         ref={ref}
+         className={cn(
+            'flex h-full w-full flex-col overflow-hidden rounded-md bg-popover text-popover-foreground',
+            className
+         )}
+         {...props}
+      />
+   )
+})
 Command.displayName = CommandPrimitive.displayName
 
-interface CommandDialogProps extends DialogProps {}
+interface CommandDialogProps extends DialogProps { }
 
 const CommandDialog = ({ children, ...props }: CommandDialogProps) => {
    return (
@@ -120,7 +138,7 @@ const CommandItem = React.forwardRef<
    <CommandPrimitive.Item
       ref={ref}
       className={cn(
-         'relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none aria-selected:bg-accent aria-selected:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
+         "relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none data-[disabled=true]:pointer-events-none data-[selected='true']:bg-accent data-[selected=true]:text-accent-foreground data-[disabled=true]:opacity-50",
          className
       )}
       {...props}

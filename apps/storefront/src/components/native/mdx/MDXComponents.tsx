@@ -2,19 +2,16 @@ import ConsCard from '@/components/native/mdx/ConsCard'
 import ProsCard from '@/components/native/mdx/ProsCard'
 import Step from '@/components/native/mdx/Step'
 import Image from 'next/image'
-import Link from 'next/link'
 
 function MDXImage({ alt, src }) {
    return (
-      <div className="my-6 w-full">
-         <Image
-            alt={alt}
-            className="mx-auto rounded-lg"
-            src={src}
-            fill
-            sizes="(min-width: 1000px) 30vw, 50vw"
-         />
-      </div>
+      <Image
+         alt={alt}
+         className="mx-auto rounded-lg"
+         src={src}
+         fill
+         sizes="(min-width: 1000px) 30vw, 50vw"
+      />
    )
 }
 

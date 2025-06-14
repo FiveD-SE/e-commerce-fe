@@ -23,17 +23,17 @@ import {
 } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
 import { cn, isVariableValid } from '@/lib/utils'
-import { slugify } from '@persepolis/slugify'
+import { slugify } from '@packages/slugify/src'
 import { Check, ChevronsUpDown } from 'lucide-react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import React, { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 
 export function SortBy({ initialData }) {
    const router = useRouter()
    const pathname = usePathname()
    const searchParams = useSearchParams()
 
-   const [value, setValue] = React.useState('featured')
+   const [value, setValue] = useState('featured')
 
    useEffect(() => {
       if (isVariableValid(initialData)) setValue(initialData)
@@ -43,7 +43,7 @@ export function SortBy({ initialData }) {
       <Select
          onValueChange={(currentValue) => {
             const current = new URLSearchParams(
-               Array.from(searchParams.entries())
+               searchParams ? Array.from(searchParams.entries()) : []
             )
 
             if (currentValue === value) {
@@ -54,9 +54,7 @@ export function SortBy({ initialData }) {
                setValue(currentValue)
             }
 
-            // cast to string
             const search = current.toString()
-            // or const query = `${'?'.repeat(search.length && 1)}${search}`;
             const query = search ? `?${search}` : ''
 
             router.replace(`${pathname}${query}`, {
@@ -81,8 +79,8 @@ export function CategoriesCombobox({ categories, initialCategory }) {
    const pathname = usePathname()
    const searchParams = useSearchParams()
 
-   const [open, setOpen] = React.useState(false)
-   const [value, setValue] = React.useState('')
+   const [open, setOpen] = useState(false)
+   const [value, setValue] = useState('')
 
    function getCategoryTitle() {
       for (const category of categories) {
@@ -93,6 +91,34 @@ export function CategoriesCombobox({ categories, initialCategory }) {
    useEffect(() => {
       setValue(initialCategory)
    }, [initialCategory])
+
+   const handleSelect = (currentValue) => {
+      const current = new URLSearchParams()
+
+      // Copy existing params safely
+      if (searchParams) {
+         for (const [key, value] of searchParams.entries()) {
+            current.set(key, value)
+         }
+      }
+
+      if (currentValue === value) {
+         current.delete('category')
+         setValue('')
+      } else {
+         current.set('category', currentValue)
+         setValue(currentValue)
+      }
+
+      const search = current.toString()
+      const query = search ? `?${search}` : ''
+
+      router.replace(`${pathname}${query}`, {
+         scroll: false,
+      })
+
+      setOpen(false)
+   }
 
    return (
       <Popover open={open} onOpenChange={setOpen}>
@@ -112,33 +138,11 @@ export function CategoriesCombobox({ categories, initialCategory }) {
                <CommandInput placeholder="Search category..." />
                <CommandEmpty>No category found.</CommandEmpty>
                <CommandGroup>
-                  {categories.map((category) => (
+                  {categories?.map((category) => (
                      <CommandItem
                         key={category.title}
-                        onSelect={(currentValue) => {
-                           const current = new URLSearchParams(
-                              Array.from(searchParams.entries())
-                           )
-
-                           if (currentValue === value) {
-                              current.delete('category')
-                              setValue('')
-                           } else {
-                              current.set('category', currentValue)
-                              setValue(currentValue)
-                           }
-
-                           // cast to string
-                           const search = current.toString()
-                           // or const query = `${'?'.repeat(search.length && 1)}${search}`;
-                           const query = search ? `?${search}` : ''
-
-                           router.replace(`${pathname}${query}`, {
-                              scroll: false,
-                           })
-
-                           setOpen(false)
-                        }}
+                        value={category.title}
+                        onSelect={handleSelect}
                      >
                         <Check
                            className={cn(
@@ -163,8 +167,8 @@ export function BrandCombobox({ brands, initialBrand }) {
    const pathname = usePathname()
    const searchParams = useSearchParams()
 
-   const [open, setOpen] = React.useState(false)
-   const [value, setValue] = React.useState('')
+   const [open, setOpen] = useState(false)
+   const [value, setValue] = useState('')
 
    function getBrandTitle() {
       for (const brand of brands) {
@@ -175,6 +179,34 @@ export function BrandCombobox({ brands, initialBrand }) {
    useEffect(() => {
       setValue(initialBrand)
    }, [initialBrand])
+
+   const handleSelect = (currentValue) => {
+      const current = new URLSearchParams()
+
+      // Copy existing params safely
+      if (searchParams) {
+         for (const [key, value] of searchParams.entries()) {
+            current.set(key, value)
+         }
+      }
+
+      if (currentValue === value) {
+         current.delete('brand')
+         setValue('')
+      } else {
+         current.set('brand', currentValue)
+         setValue(currentValue)
+      }
+
+      const search = current.toString()
+      const query = search ? `?${search}` : ''
+
+      router.replace(`${pathname}${query}`, {
+         scroll: false,
+      })
+
+      setOpen(false)
+   }
 
    return (
       <Popover open={open} onOpenChange={setOpen}>
@@ -194,33 +226,11 @@ export function BrandCombobox({ brands, initialBrand }) {
                <CommandInput placeholder="Search brand..." />
                <CommandEmpty>No brand found.</CommandEmpty>
                <CommandGroup>
-                  {brands.map((brand) => (
+                  {brands?.map((brand) => (
                      <CommandItem
                         key={brand.title}
-                        onSelect={(currentValue) => {
-                           const current = new URLSearchParams(
-                              Array.from(searchParams.entries())
-                           )
-
-                           if (currentValue === value) {
-                              current.delete('brand')
-                              setValue('')
-                           } else {
-                              current.set('brand', currentValue)
-                              setValue(currentValue)
-                           }
-
-                           // cast to string
-                           const search = current.toString()
-                           // or const query = `${'?'.repeat(search.length && 1)}${search}`;
-                           const query = search ? `?${search}` : ''
-
-                           router.replace(`${pathname}${query}`, {
-                              scroll: false,
-                           })
-
-                           setOpen(false)
-                        }}
+                        value={brand.title}
+                        onSelect={handleSelect}
                      >
                         <Check
                            className={cn(
@@ -244,37 +254,42 @@ export function AvailableToggle({ initialData }) {
    const router = useRouter()
    const pathname = usePathname()
    const searchParams = useSearchParams()
-   const [value, setValue] = React.useState(false)
+   const [value, setValue] = useState(false)
 
    useEffect(() => {
       setValue(initialData === 'true' ? true : false)
    }, [initialData])
+
+   const handleChange = (currentValue) => {
+      const current = new URLSearchParams()
+
+      // Copy existing params safely
+      if (searchParams) {
+         for (const [key, value] of searchParams.entries()) {
+            current.set(key, value)
+         }
+      }
+
+      current.set(
+         'isAvailable',
+         currentValue === true ? 'true' : 'false'
+      )
+      setValue(currentValue)
+
+      const search = current.toString()
+      const query = search ? `?${search}` : ''
+
+      router.replace(`${pathname}${query}`, {
+         scroll: false,
+      })
+   }
 
    return (
       <div className="flex w-full border rounded-md items-center space-x-2">
          <div className="mx-auto flex gap-2 items-center">
             <Switch
                checked={value}
-               onCheckedChange={(currentValue: boolean) => {
-                  const current = new URLSearchParams(
-                     Array.from(searchParams.entries())
-                  )
-
-                  current.set(
-                     'isAvailable',
-                     currentValue == true ? 'true' : 'false'
-                  )
-                  setValue(currentValue)
-
-                  // cast to string
-                  const search = current.toString()
-                  // or const query = `${'?'.repeat(search.length && 1)}${search}`;
-                  const query = search ? `?${search}` : ''
-
-                  router.replace(`${pathname}${query}`, {
-                     scroll: false,
-                  })
-               }}
+               onCheckedChange={handleChange}
                id="available"
             />
             <Label htmlFor="available">Only Available</Label>

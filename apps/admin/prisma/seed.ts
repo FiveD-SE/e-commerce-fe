@@ -29,9 +29,7 @@ function getRandomBoolean() {
 
 const prisma = new PrismaClient()
 
-async function main() {
-   console.log('SEED SCRIPT STARTED')
-   
+async function main() {   
    let createdProducts = [],
       createdProviders = []
 
@@ -180,6 +178,66 @@ async function main() {
          label: 'Something',
       },
    ]
+
+   const discountCodes = [
+      {
+         code: 'TECHFEST25',
+         stock: 100,
+         description: 'Discount for Tech Festival 2025.',
+         percent: 15,
+         maxDiscountAmount: 200,
+         startDate: new Date('2025-06-14'),
+         endDate: new Date('2025-06-30')
+      },
+      {
+         code: 'GADGET10',
+         stock: 50,
+         description: '10% off on all gadgets.',
+         percent: 10,
+         maxDiscountAmount: 100,
+         startDate: new Date('2025-06-14'),
+         endDate: new Date('2025-07-14')
+      },
+      {
+         code: 'SMARTPHONE20',
+         stock: 30,
+         description: '20% off on smartphones.',
+         percent: 20,
+         maxDiscountAmount: 300,
+         startDate: new Date('2025-06-14'),
+         endDate: new Date('2025-06-21')
+      },
+      {
+         code: 'AUDIODEAL',
+         stock: 75,
+         description: 'Special deal on audio devices.',
+         percent: 12,
+         maxDiscountAmount: 150,
+         startDate: new Date('2025-06-14'),
+         endDate: new Date('2025-07-01')
+      },
+      {
+         code: 'NEWCUSTOMER',
+         stock: 200,
+         description: 'Welcome discount for new customers.',
+         percent: 8,
+         maxDiscountAmount: 80,
+         startDate: new Date('2025-06-14'),
+         endDate: new Date('2025-12-31')
+      }
+   ]
+
+   try {
+      for (const code of discountCodes) {
+         await prisma.discountCode.create({
+            data: code,
+         })
+      }
+
+      console.log('Created Discount Codes...')
+   } catch (error) {
+      console.error('Could not create discount codes...')
+   }
 
    try {
       for (const banner of banners) {

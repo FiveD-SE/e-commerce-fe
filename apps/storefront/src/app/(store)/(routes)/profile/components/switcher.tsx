@@ -47,7 +47,7 @@ export function UserCombobox({ initialValue }) {
 
    return (
       <DropdownMenu>
-         <DropdownMenuTrigger>
+         <DropdownMenuTrigger asChild>
             <Button variant="outline" className="flex gap-2">
                <p>{getCategoryTitle()}</p>
                <ChevronsUpDownIcon className="h-4" />

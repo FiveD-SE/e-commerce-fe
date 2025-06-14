@@ -1,11 +1,9 @@
-import MDXComponents from '@/components/native/mdx/MDXComponents'
-import { Separator } from '@/components/native/separator'
 import prisma from '@/lib/prisma'
-import { format, parseISO } from 'date-fns'
-import { MDXRemote } from 'next-mdx-remote'
 import { serialize } from 'next-mdx-remote/serialize'
 import Image from 'next/image'
 import Link from 'next/link'
+import { Content } from '../components/content'
+import rehypeUnwrapImages from 'rehype-unwrap-images'
 
 export default async function Blog({ params }: { params: { slug: string } }) {
    const blog = await prisma.blog.findUnique({
@@ -20,7 +18,11 @@ export default async function Blog({ params }: { params: { slug: string } }) {
       take: 3,
    })
 
-   const mdx = await serialize(blog.content)
+   const mdx = await serialize(blog.content, {
+      mdxOptions: {
+         rehypePlugins: [rehypeUnwrapImages],
+      },
+   })
 
    return (
       <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
@@ -30,29 +32,14 @@ export default async function Blog({ params }: { params: { slug: string } }) {
    )
 }
 
-function Content({ blog, mdx }) {
-   const { title, updatedAt } = blog
-
-   return (
-      <div className="rounded-lg bg-white p-6 text-justify text-neutral-900 dark:bg-neutral-800 dark:text-neutral-200 md:col-span-3">
-         <h1 className="mb-1 text-3xl font-medium">{title}</h1>
-         <p className="mt-2 text-sm font-medium text-neutral-400">
-            Last Updated @Date
-         </p>
-         <Separator />
-         <MDXRemote lazy {...mdx} components={MDXComponents} />
-      </div>
-   )
-}
-
 function Recomendations({ recommendations }) {
    return (
       <div className="col-span-1">
-         {recommendations.map((rec) => {
+         {recommendations.map((rec, index) => {
             const { slug, author, createdAt, updatedAt, title, image } = rec
 
             return (
-               <div key={rec} className="mb-4 w-full">
+               <div key={index} className="mb-4 w-full">
                   <Link href={`/blog/${slug}`}>
                      <div className="w-full rounded-lg border border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-800">
                         <div className="relative h-40 w-full">

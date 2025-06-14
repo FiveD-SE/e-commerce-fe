@@ -14,7 +14,8 @@
       "db:reset": "npx prisma db push --force-reset",
       "db:push": "npx prisma db push",
       "db:seed": "bun prisma/seed.ts",
-      "db:studio": "npx prisma studio"
+      "db:studio": "npx prisma studio",
+      "db:reseed": "bun run db:reset && bun run db:seed"
    },
    "dependencies": {
       "@hookform/resolvers": "^3.9.0",
@@ -46,7 +47,7 @@
       "date-fns": "^4.1.0",
       "jose": "^5.9.4",
       "lucide-react": "^0.452.0",
-      "next": "14.2.15",
+      "next": "^15.3.3",
       "next-cloudinary": "^6.14.1",
       "next-themes": "^0.3.0",
       "nodemailer": "^6.9.15",

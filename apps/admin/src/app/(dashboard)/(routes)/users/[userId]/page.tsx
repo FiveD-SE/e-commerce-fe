@@ -9,7 +9,7 @@ import { Heading } from '@/components/ui/heading'
 import prisma from '@/lib/prisma'
 import { format } from 'date-fns'
 
-import type { OrderColumn } from '../../orders/components/table'
+import type { OrderColumn } from '../../orders/components/columns'
 import { OrderTable } from '../../orders/components/table'
 import { UserForm } from './components/user-form'
 

@@ -15,12 +15,12 @@ export function getLocalCart() {
 
 export function getCountInCart({ cartItems, productId }) {
    try {
+      if (!Array.isArray(cartItems)) return 0
       for (let i = 0; i < cartItems.length; i++) {
          if (cartItems[i]?.productId === productId) {
             return cartItems[i]?.count
          }
       }
-
       return 0
    } catch (error) {
       console.error({ error })

@@ -20,20 +20,18 @@ import {
    TableRow,
 } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 
 interface DataTableProps<TData, TValue> {
    columns: ColumnDef<TData, TValue>[]
    data: TData[]
-   searchKey: string
 }
 
 export function DataTable<TData, TValue>({
    columns,
    data,
-   searchKey,
 }: DataTableProps<TData, TValue>) {
    const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+
    const table = useReactTable({
       data,
       columns,
@@ -47,19 +45,7 @@ export function DataTable<TData, TValue>({
    })
 
    return (
-      <div>
-         <div className="flex items-center py-4">
-            <Input
-               placeholder="Search"
-               value={
-                  (table.getColumn(searchKey)?.getFilterValue() as string) ?? ''
-               }
-               onChange={(event) =>
-                  table.getColumn(searchKey)?.setFilterValue(event.target.value)
-               }
-               className="max-w-sm"
-            />
-         </div>
+      <div className="py-4">
          <div className="rounded-md border">
             <Table>
                <TableHeader>
@@ -71,9 +57,9 @@ export function DataTable<TData, TValue>({
                                  {header.isPlaceholder
                                     ? null
                                     : flexRender(
-                                         header.column.columnDef.header,
-                                         header.getContext()
-                                      )}
+                                       header.column.columnDef.header,
+                                       header.getContext()
+                                    )}
                               </TableHead>
                            )
                         })}

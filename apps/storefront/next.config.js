@@ -8,6 +8,7 @@ module.exports = {
                 hostname: '**',
             },
         ],
+        domains: ['cdn.80.lv'],
     },
     async redirects() {
         return [

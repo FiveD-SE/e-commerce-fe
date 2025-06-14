@@ -1,53 +1,32 @@
-import { Heading } from '@/components/ui/heading'
-import { Separator } from '@/components/ui/separator'
 import prisma from '@/lib/prisma'
 import { format } from 'date-fns'
 
-import { SortBy } from './components/options'
-import type { OrderColumn } from './components/table'
-import { OrderTable } from './components/table'
+import { OrderClient } from './components/client'
+import type { OrderColumn } from './components/columns'
 
 export default async function OrdersPage({ searchParams }) {
-   const {
-      userId,
-      sort,
-      isPaid,
-      brand,
-      category,
-      page = 1,
-      minPayable,
-      maxPayable,
-   } = searchParams ?? null
+   const { sort, isPaid, search, page = 1 } = searchParams ?? null
 
    const orderBy = getOrderBy(sort)
 
-   const orders = await prisma.order.findMany({
-      where: {
-         userId,
-         isPaid,
-         orderItems: {
-            some: {
-               product: {
-                  brand: {
-                     title: {
-                        contains: brand,
-                     },
-                  },
-                  categories: {
-                     some: {
-                        title: {
-                           contains: category,
-                        },
-                     },
-                  },
-               },
+   const where: any = {}
+   if (isPaid === 'true') where.isPaid = true
+   if (isPaid === 'false') where.isPaid = false
+   if (search) {
+      const numberFilter = isNaN(Number(search)) ? undefined : Number(search)
+      where.OR = [
+         numberFilter ? { number: numberFilter } : undefined,
+         {
+            createdAt: {
+               equals: isNaN(Date.parse(search)) ? undefined : new Date(search),
             },
          },
-         payable: {
-            gte: minPayable,
-            lte: maxPayable,
-         },
-      },
+         isNaN(Number(search)) ? undefined : { payable: Number(search) },
+      ].filter(Boolean)
+   }
+
+   const orders = await prisma.order.findMany({
+      where,
       include: {
          orderItems: {
             include: {
@@ -71,15 +50,7 @@ export default async function OrdersPage({ searchParams }) {
 
    return (
       <div className="block space-y-4 my-6">
-         <Heading
-            title={`Orders (${orders.length})`}
-            description="Manage orders for your store"
-         />
-         <Separator />
-         <div className="grid grid-cols-4 gap-2">
-            <SortBy initialData={'highest_payable'} />
-         </div>
-         <OrderTable data={formattedOrders} />{' '}
+         <OrderClient data={formattedOrders} />
       </div>
    )
 }

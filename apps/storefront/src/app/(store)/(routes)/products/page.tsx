@@ -12,15 +12,22 @@ import {
 } from './components/options'
 
 export default async function Products({ searchParams }) {
-   const { sort, isAvailable, brand, category, page = 1 } = searchParams ?? null
+   const params = await searchParams
+   const { sort, isAvailable, brand, category, page = 1 } = params ?? {}
+
+   console.log('params', params)
 
    const orderBy = getOrderBy(sort)
 
    const brands = await prisma.brand.findMany()
    const categories = await prisma.category.findMany()
+
+   console.log('brands', brands)
+   console.log('categories', categories)
+
    const products = await prisma.product.findMany({
       where: {
-         isAvailable: isAvailable == 'true' || sort ? true : undefined,
+         isAvailable: isAvailable === 'true' || sort ? true : undefined,
          brand: {
             title: {
                contains: brand,

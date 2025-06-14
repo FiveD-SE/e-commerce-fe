@@ -58,5 +58,5 @@ interface CodesClientProps {
 }
 
 export const CodesClient: React.FC<CodesClientProps> = ({ data }) => {
-    return <DataTable searchKey="code" columns={columns} data={data} />
+    return <DataTable columns={columns} data={data} />
 } 

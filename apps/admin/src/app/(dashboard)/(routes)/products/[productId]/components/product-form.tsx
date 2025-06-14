@@ -68,21 +68,22 @@ export const ProductForm: React.FC<ProductFormProps> = ({
 
    const defaultValues = initialData
       ? {
-           ...initialData,
-           price: parseFloat(String(initialData?.price.toFixed(2))),
-           discount: parseFloat(String(initialData?.discount.toFixed(2))),
-        }
+         ...initialData,
+         price: parseFloat(String(initialData?.price.toFixed(2))),
+         discount: parseFloat(String(initialData?.discount.toFixed(2))),
+         categoryId: initialData.categories?.[0]?.id || '',
+      }
       : {
-           title: '---',
-           description: '---',
-           images: [],
-           price: 0,
-           discount: 0,
-           stock: 0,
-           categoryId: '---',
-           isFeatured: false,
-           isAvailable: false,
-        }
+         title: '---',
+         description: '---',
+         images: [],
+         price: 0,
+         discount: 0,
+         stock: 0,
+         categoryId: '',
+         isFeatured: false,
+         isAvailable: false,
+      }
 
    const form = useForm<ProductFormValues>({
       resolver: zodResolver(formSchema),

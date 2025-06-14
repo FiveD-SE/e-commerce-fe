@@ -1,199 +1,100 @@
 'use client'
 
-import { Button } from '@/components/ui/button'
-import { Checkbox } from '@/components/ui/checkbox'
-import {
-   Form,
-   FormControl,
-   FormDescription,
-   FormField,
-   FormItem,
-   FormLabel,
-   FormMessage,
-} from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
+import { CardContent } from '@/components/ui/card'
 import type { OrderWithIncludes } from '@/types/prisma'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { useParams, useRouter } from 'next/navigation'
-import { useState } from 'react'
-import { useForm } from 'react-hook-form'
-import { toast } from 'react-hot-toast'
-import * as z from 'zod'
+import Image from 'next/image'
+import Link from 'next/link'
 
-const formSchema = z.object({
-   status: z.string().min(1),
-   shipping: z.coerce.number().min(1),
-   payable: z.coerce.number().min(1),
-   discount: z.coerce.number().min(0),
-   isPaid: z.boolean().default(false).optional(),
-   isCompleted: z.boolean().default(false).optional(),
-})
-
-type ProductFormValues = z.infer<typeof formSchema>
-
-interface ProductFormProps {
+interface OrderFormProps {
    initialData: OrderWithIncludes | null
 }
 
-export const OrderForm: React.FC<ProductFormProps> = ({ initialData }) => {
-   const params = useParams()
-   const router = useRouter()
+function ReadonlyField({ label, value }: { label: string; value: React.ReactNode }) {
+   return (
+      <div className="space-y-1 w-full">
+         <div className="text-sm font-medium mb-1">{label}</div>
+         <div className="flex items-center h-10 w-full rounded-md border border-input bg-muted px-3 py-2 text-sm text-muted-foreground">
+            {value}
+         </div>
+      </div>
+   )
+}
 
-   const [loading, setLoading] = useState(false)
-
-   const toastMessage = 'Order updated.'
-   const action = 'Save changes'
-
-   const defaultValues = initialData
-      ? {
-           ...initialData,
-        }
-      : {
-           status: '---',
-           shipping: 0,
-           payable: 0,
-           discount: 0,
-           isPaid: false,
-           isCompleted: false,
-        }
-
-   const form = useForm<ProductFormValues>({
-      resolver: zodResolver(formSchema),
-      defaultValues,
-   })
-
-   const onSubmit = async (data: ProductFormValues) => {
-      try {
-         setLoading(true)
-
-         if (initialData) {
-            await fetch(`/api/products/${params.productId}`, {
-               method: 'PATCH',
-               body: JSON.stringify(data),
-               cache: 'no-store',
-            })
-         } else {
-            await fetch(`/api/products`, {
-               method: 'POST',
-               body: JSON.stringify(data),
-               cache: 'no-store',
-            })
-         }
-
-         router.refresh()
-         router.push(`/products`)
-         toast.success(toastMessage)
-      } catch (error: any) {
-         toast.error('Something went wrong.')
-      } finally {
-         setLoading(false)
-      }
-   }
+export const OrderForm: React.FC<OrderFormProps> = ({ initialData }) => {
+   if (!initialData) return <div>No order data.</div>
 
    return (
-      <Form {...form}>
-         <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="block space-y-2 w-full"
-         >
-            <FormField
-               control={form.control}
-               name="shipping"
-               render={({ field }) => (
-                  <FormItem>
-                     <FormLabel>Price</FormLabel>
-                     <FormControl>
-                        <Input
-                           type="number"
-                           disabled={loading}
-                           placeholder="9.99"
-                           {...field}
+      <div className="block space-y-6 w-full">
+         {/* Order Items */}
+         <div className="space-y-4">
+            <div className="text-lg font-semibold mb-2">Order Items</div>
+            {initialData.orderItems.map((item, index) => (
+               <CardContent className="grid grid-cols-6 gap-4 p-3" key={index}>
+                  <div className="relative h-60 w-full col-span-2 hidden md:inline-flex">
+                     <Link href={`/products/${item.product.id}`}>
+                        <Image
+                           className="rounded-lg"
+                           src={item.product.images[0]}
+                           alt="item image"
+                           fill
+                           style={{ objectFit: 'cover' }}
                         />
-                     </FormControl>
-                     <FormMessage />
-                  </FormItem>
-               )}
-            />
-            <FormField
-               control={form.control}
-               name="payable"
-               render={({ field }) => (
-                  <FormItem>
-                     <FormLabel>Discount</FormLabel>
-                     <FormControl>
-                        <Input
-                           type="number"
-                           disabled={loading}
-                           placeholder="9.99"
-                           {...field}
-                        />
-                     </FormControl>
-                     <FormMessage />
-                  </FormItem>
-               )}
-            />
-            <FormField
-               control={form.control}
-               name="discount"
-               render={({ field }) => (
-                  <FormItem>
-                     <FormLabel>Discount</FormLabel>
-                     <FormControl>
-                        <Input
-                           type="number"
-                           disabled={loading}
-                           placeholder="9.99"
-                           {...field}
-                        />
-                     </FormControl>
-                     <FormMessage />
-                  </FormItem>
-               )}
-            />
-            <FormField
-               control={form.control}
-               name="isPaid"
-               render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                     <FormControl>
-                        <Checkbox
-                           checked={field.value}
-                           onCheckedChange={field.onChange}
-                        />
-                     </FormControl>
-                     <div className="space-y-1 leading-none">
-                        <FormLabel>Featured</FormLabel>
-                        <FormDescription>
-                           This product will appear on the home page
-                        </FormDescription>
+                     </Link>
+                  </div>
+                  <div className="col-span-4 block space-y-2">
+                     <Link href={`/products/${item.product.id}`}>
+                        <h2 className="font-semibold text-lg">{item.product.title}</h2>
+                     </Link>
+                     <p className="text-xs text-muted-foreground text-justify">
+                        <span className="font-medium">Price:</span> ${item.product.price}
+                     </p>
+                     <p className="text-xs text-muted-foreground text-justify">
+                        <span className="font-medium">Brand:</span> {item.product.brand?.title}
+                     </p>
+                     <p className="text-xs text-muted-foreground text-justify">
+                        <span className="font-medium">Categories:</span> {item.product.categories.map(c => c.title).join(', ')}
+                     </p>
+                  </div>
+               </CardContent>
+            ))}
+         </div>
+
+         {/* Order Info */}
+         <div className="space-y-4">
+            <div className="text-lg font-semibold mb-2">Order Info</div>
+            <div className="flex flex-col gap-3">
+               <ReadonlyField label="Order Number" value={`#${initialData.number}`} />
+               <ReadonlyField label="Status" value={initialData.status} />
+               <ReadonlyField label="Created At" value={new Date(initialData.createdAt).toLocaleString()} />
+               <ReadonlyField label="Updated At" value={new Date(initialData.updatedAt).toLocaleString()} />
+               <ReadonlyField label="Shipping" value={`$${initialData.shipping}`} />
+               <ReadonlyField label="Discount" value={`$${initialData.discount}`} />
+               <ReadonlyField label="Tax" value={`$${initialData.tax}`} />
+               <ReadonlyField label="Total" value={`$${initialData.total}`} />
+               <ReadonlyField label="Payable" value={`$${initialData.payable}`} />
+               <ReadonlyField label="Paid" value={initialData.isPaid ? 'Yes' : 'No'} />
+               <ReadonlyField label="Completed" value={initialData.isCompleted ? 'Yes' : 'No'} />
+            </div>
+         </div>
+
+         {/* Payments */}
+         {initialData.payments && initialData.payments.length > 0 && (
+            <div className="space-y-4 mt-6">
+               <div className="text-lg font-semibold mb-2">Payments</div>
+               <div className="flex flex-col gap-4">
+                  {initialData.payments.map((payment, idx) => (
+                     <div key={payment.id} className="border rounded p-3 flex flex-col gap-2">
+                        <ReadonlyField label="Payment Number" value={`#${payment.number}`} />
+                        <ReadonlyField label="Status" value={payment.status} />
+                        <ReadonlyField label="Payable" value={`$${payment.payable}`} />
+                        <ReadonlyField label="Successful" value={payment.isSuccessful ? 'Yes' : 'No'} />
+                        <ReadonlyField label="Provider" value={payment.provider?.title || '-'} />
+                        <ReadonlyField label="Created At" value={new Date(payment.createdAt).toLocaleString()} />
                      </div>
-                  </FormItem>
-               )}
-            />
-            <FormField
-               control={form.control}
-               name="isCompleted"
-               render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                     <FormControl>
-                        <Checkbox
-                           checked={field.value}
-                           onCheckedChange={field.onChange}
-                        />
-                     </FormControl>
-                     <div className="space-y-1 leading-none">
-                        <FormLabel>Available</FormLabel>
-                        <FormDescription>
-                           This product will appear in the store.
-                        </FormDescription>
-                     </div>
-                  </FormItem>
-               )}
-            />
-            <Button disabled={loading} className="ml-auto" type="submit">
-               {action}
-            </Button>
-         </form>
-      </Form>
+                  ))}
+               </div>
+            </div>
+         )}
+      </div>
    )
 }

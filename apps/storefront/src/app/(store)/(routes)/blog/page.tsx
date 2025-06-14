@@ -6,6 +6,8 @@ export default async function Index() {
       include: { author: true },
    })
 
+   console.log('blogs', blogs)
+
    return (
       <div className="flex flex-col border-neutral-200 dark:border-neutral-700">
          <h3 className="mb-6 text-2xl font-bold tracking-tight md:text-4xl">

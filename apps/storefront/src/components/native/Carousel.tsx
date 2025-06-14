@@ -35,7 +35,7 @@ export default function Carousel({ images }: { images: string[] }) {
                ))}
             </div>
          </div>
-         <Dots itemsLength={images.length} selectedIndex={selectedIndex} />
+         <Dots itemsLength={images.length} selectedIndex={selectedIndex} setSelectedIndex={setSelectedIndex} emblaApi={emblaApi} />
       </>
    )
 }
@@ -43,11 +43,15 @@ export default function Carousel({ images }: { images: string[] }) {
 type Props = {
    itemsLength: number
    selectedIndex: number
+   setSelectedIndex: (index: number) => void
+   emblaApi: any
 }
-const Dots = ({ itemsLength, selectedIndex }: Props) => {
+const Dots = ({ itemsLength, selectedIndex, setSelectedIndex, emblaApi }: Props) => {
    const arr = new Array(itemsLength).fill(0)
    return (
-      <div className="flex gap-1 justify-center -translate-y-8">
+      <div
+         className="flex gap-1 justify-center -translate-y-8"
+      >
          {arr.map((_, index) => {
             const selected = index === selectedIndex
             return (
@@ -59,6 +63,10 @@ const Dots = ({ itemsLength, selectedIndex }: Props) => {
                      'h-3 w-3 opacity-50': !selected,
                   })}
                   key={index}
+                  onClick={() => {
+                     setSelectedIndex(index)
+                     emblaApi && emblaApi.scrollTo(index)
+                  }}
                />
             )
          })}

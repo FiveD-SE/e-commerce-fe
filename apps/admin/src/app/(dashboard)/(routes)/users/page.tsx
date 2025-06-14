@@ -26,7 +26,7 @@ export default async function UsersPage() {
 
    return (
       <div className="block space-y-4 my-6">
-         <Heading title="Users" description="Manage products for your store" />
+         <Heading title="Users" description="Manage users for your store" />
          <Separator />
          <UsersTable data={formattedUsers} />
       </div>

@@ -1,8 +1,8 @@
 import prisma from '@/lib/prisma'
 import { generateSerial } from '@/lib/serial'
 import { getErrorResponse } from '@/lib/utils'
-import { isIranianPhoneNumberValid } from '@persepolis/regex'
-import { sendTransactionalSMS } from '@persepolis/sms'
+import { isIranianPhoneNumberValid } from '@packages/regex/src'
+import { sendTransactionalSMS } from '@packages/sms/src'
 import { NextRequest, NextResponse } from 'next/server'
 import { ZodError } from 'zod'
 

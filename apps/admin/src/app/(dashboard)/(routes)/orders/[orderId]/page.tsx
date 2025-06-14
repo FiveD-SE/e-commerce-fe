@@ -16,28 +16,27 @@ import prisma from '@/lib/prisma'
 import Link from 'next/link'
 
 import { OrderForm } from './components/order-form'
+import { OrderWithIncludes } from '@/types/prisma'
 
-const ProductPage = async ({ params }: { params: { orderId: string } }) => {
-   const order = await prisma.order.findUnique({
+const OrderPage = async ({ params }: { params: { orderId: string } }) => {
+   const order = await prisma.order.findUniqueOrThrow({
       where: {
          id: params.orderId,
       },
       include: {
          address: true,
          discountCode: true,
-         user: {
-            include: {
-               addresses: true,
-               payments: true,
-               orders: true,
-            },
-         },
+         user: true,
          payments: {
             include: {
                provider: true,
             },
          },
-         orderItems: { include: { product: true } },
+         orderItems: {
+            include: {
+               product: { include: { brand: true, categories: true } },
+            },
+         },
          refund: true,
       },
    })
@@ -95,7 +94,7 @@ const ProductPage = async ({ params }: { params: { orderId: string } }) => {
       )
    }
 
-   function EditOrderCard() {
+   function OrderCardInfo() {
       return (
          <Card className="my-4 p-2">
             <CardContent>
@@ -104,15 +103,15 @@ const ProductPage = async ({ params }: { params: { orderId: string } }) => {
                      <AccordionTrigger>
                         <div className="block">
                            <h2 className="text-lg font-bold tracking-wider text-left">
-                              EDIT ORDER
+                              VIEW ORDER
                            </h2>
                            <p className="text-sm font-light text-foreground/70">
-                              User in this order.
+                              Products in this order.
                            </p>
                         </div>
                      </AccordionTrigger>
                      <AccordionContent>
-                        <OrderForm initialData={order} />
+                        <OrderForm initialData={order as OrderWithIncludes} />
                      </AccordionContent>
                   </AccordionItem>
                </Accordion>
@@ -131,10 +130,10 @@ const ProductPage = async ({ params }: { params: { orderId: string } }) => {
                />
             </div>
             <UserCard />
-            <EditOrderCard />
+            <OrderCardInfo />
          </div>
       </div>
    )
 }
 
-export default ProductPage
+export default OrderPage
