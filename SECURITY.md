@@ -13,7 +13,7 @@ If you discover a security vulnerability in this project, we appreciate your res
 
 To report a vulnerability, please follow these steps:
 
-1.  **Email**: Send an email to our security team at [:uit@post.com](mailto:ecommerceuit2252@gmail.com).
+1.  **Email**: Send an email to our security team at [:ecommerceuit2252@gmail.com](mailto:ecommerceuit2252@gmail.com).
 2.  **Subject**: Use a clear and descriptive subject line, such as "Security Vulnerability Report"
 3.  **Description**: Provide a detailed description of the vulnerability, including the steps to reproduce it and any relevant information that can help us understand and address the issue.
 4.  **Attach Proof of Concept**: If possible, provide a proof-of-concept or sample code that demonstrates the vulnerability. However, please refrain from performing any destructive actions or violating any privacy or security laws during your research.
