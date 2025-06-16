@@ -48,5 +48,5 @@ interface AddressTableProps {
 }
 
 export const AddressTable: React.FC<AddressTableProps> = ({ data }) => {
-   return <DataTable searchKey="products" columns={columns} data={data} />
+   return <DataTable columns={columns} data={data} />
 }

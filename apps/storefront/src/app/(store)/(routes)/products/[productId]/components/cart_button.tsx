@@ -7,6 +7,7 @@ import { getCountInCart, getLocalCart } from '@/lib/cart'
 import { CartContextProvider, useCartContext } from '@/state/Cart'
 import { MinusIcon, PlusIcon, ShoppingBasketIcon, X } from 'lucide-react'
 import { useState } from 'react'
+import { Badge } from '@/components/ui/badge'
 
 export default function CartButton({ product }) {
    return (
@@ -160,9 +161,13 @@ export function ButtonComponent({ product }) {
 
    if (count === 0) {
       return (
-         <Button className="flex gap-2" onClick={onAddToCart}>
-            <ShoppingBasketIcon className="h-4" /> Add to Cart
-         </Button>
+         product?.isAvailable ? (
+            <Button className="flex gap-2" onClick={onAddToCart}>
+               <ShoppingBasketIcon className="h-4" /> Add to Cart
+            </Button>
+         ) : (
+            <Badge variant="secondary">Out of stock</Badge>
+         )
       )
    }
 

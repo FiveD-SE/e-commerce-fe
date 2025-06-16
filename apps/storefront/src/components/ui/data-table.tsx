@@ -45,7 +45,7 @@ export function DataTable<TData, TValue>({
    })
 
    return (
-      <div className="py-4">
+      <div className="py-4 w-full">
          <div className="rounded-md border">
             <Table>
                <TableHeader>

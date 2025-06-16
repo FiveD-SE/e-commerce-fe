@@ -5,10 +5,14 @@ import Link from 'next/link'
 import { Content } from '../components/content'
 import rehypeUnwrapImages from 'rehype-unwrap-images'
 
-export default async function Blog({ params }: { params: { slug: string } }) {
+export default async function BlogDetail({
+   params,
+}: {
+   params: Promise<{ slug: string }>
+}) {
    const blog = await prisma.blog.findUnique({
       where: {
-         slug: params.slug,
+         slug: (await params).slug,
       },
       include: { author: true },
    })

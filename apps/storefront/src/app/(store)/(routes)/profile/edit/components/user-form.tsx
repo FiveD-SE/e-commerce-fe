@@ -13,7 +13,7 @@ import {
 import { Input } from '@/components/ui/input'
 import type { UserWithIncludes } from '@/types/prisma'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useParams, useRouter } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'react-hot-toast'
@@ -32,7 +32,6 @@ interface UserFormProps {
 }
 
 export const UserForm: React.FC<UserFormProps> = ({ initialData }) => {
-   const params = useParams()
    const router = useRouter()
 
    const [loading, setLoading] = useState(false)
@@ -42,13 +41,13 @@ export const UserForm: React.FC<UserFormProps> = ({ initialData }) => {
 
    const defaultValues = initialData
       ? {
-           ...initialData,
-        }
+         ...initialData,
+      }
       : {
-           name: '---',
-           phone: '---',
-           email: '---',
-        }
+         name: '---',
+         phone: '---',
+         email: '---',
+      }
 
    const form = useForm<UserFormValues>({
       resolver: zodResolver(formSchema),
@@ -60,21 +59,19 @@ export const UserForm: React.FC<UserFormProps> = ({ initialData }) => {
          setLoading(true)
 
          if (initialData) {
-            await fetch(`/api/products/${params.productId}`, {
+            await fetch(`/api/users/${initialData.id}`, {
                method: 'PATCH',
-               body: JSON.stringify({ data }),
+               body: JSON.stringify(data),
                cache: 'no-store',
             })
          } else {
-            await fetch(`/api/products`, {
+            await fetch(`/api/users`, {
                method: 'POST',
-               body: JSON.stringify({ data }),
+               body: JSON.stringify(data),
                cache: 'no-store',
             })
          }
 
-         router.refresh()
-         router.push(`/products`)
          toast.success(toastMessage)
       } catch (error: any) {
          toast.error('Something went wrong.')

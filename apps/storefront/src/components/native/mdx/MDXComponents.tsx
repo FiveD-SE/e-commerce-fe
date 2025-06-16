@@ -9,8 +9,14 @@ function MDXImage({ alt, src }) {
          alt={alt}
          className="mx-auto rounded-lg"
          src={src}
-         fill
-         sizes="(min-width: 1000px) 30vw, 50vw"
+         width={400}
+         height={200}
+         style={{
+            objectFit: 'cover',
+            width: '100%',
+            height: 'auto',
+            margin: '16px auto',
+         }}
       />
    )
 }

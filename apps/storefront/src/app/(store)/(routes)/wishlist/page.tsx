@@ -1,13 +1,17 @@
 'use client'
 
-import { CartGrid } from '@/app/(store)/(routes)/cart/components/grid'
 import { useAuthenticated } from '@/hooks/useAuthentication'
-import { isVariableValid, validateBoolean } from '@/lib/utils'
+import { isVariableValid } from '@/lib/utils'
 import { useUserContext } from '@/state/User'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import { WishlistGrid } from './components/grid'
+import { CartContextProvider } from '@/state/Cart'
+import { Heading } from '@/components/native/heading'
 
-export default function User({}) {
+// import { WishlistGrid } from './components/grid'
+
+export default function User({ }) {
    const { authenticated } = useAuthenticated()
    const { user, loading } = useUserContext()
 
@@ -22,12 +26,16 @@ export default function User({}) {
       async function getWishlist() {
          try {
             const response = await fetch(`/api/wishlist`, {
+               method: 'GET',
+               headers: {
+                  'Content-Type': 'application/json',
+               },
                cache: 'no-store',
             })
 
             const json = await response.json()
 
-            setItems(json?.wishlist?.items)
+            setItems(Array.isArray(json) ? json : json?.wishlist?.items)
          } catch (error) {
             console.error({ error })
          }
@@ -37,8 +45,12 @@ export default function User({}) {
    }, [authenticated])
 
    return (
-      <>
-         <CartGrid />
-      </>
+      <CartContextProvider>
+         <Heading
+            title="Wishlist"
+            description="Below is a list of products you have in your wishlist."
+         />
+         <WishlistGrid items={items} />
+      </CartContextProvider>
    )
 }

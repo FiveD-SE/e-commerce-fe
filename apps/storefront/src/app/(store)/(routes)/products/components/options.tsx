@@ -285,14 +285,14 @@ export function AvailableToggle({ initialData }) {
    }
 
    return (
-      <div className="flex w-full border rounded-md items-center space-x-2">
+      <div className="flex w-full border rounded-md items-center h-9 px-3 text-sm">
          <div className="mx-auto flex gap-2 items-center">
             <Switch
                checked={value}
                onCheckedChange={handleChange}
                id="available"
             />
-            <Label htmlFor="available">Only Available</Label>
+            <Label htmlFor="available" className="text-sm">Only Available</Label>
          </div>
       </div>
    )

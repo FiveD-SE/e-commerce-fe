@@ -1,44 +1,85 @@
-const PrivacyPolicy = () => {
+'use client'
+
+import { useEffect, useState } from 'react'
+import { CartContextProvider, useCartContext } from '@/state/Cart'
+import { useAuthenticated } from '@/hooks/useAuthentication'
+import { Heading } from '@/components/native/heading'
+import { Receipt } from '../cart/components/receipt'
+
+const mockPaymentMethods = [
+   { id: 'cod', label: 'Cash on Delivery' },
+   { id: 'bank', label: 'Bank Transfer' },
+]
+
+export default function CheckoutPage() {
+   const { cart } = useCartContext()
+   const { authenticated } = useAuthenticated()
+   const [addresses, setAddresses] = useState([])
+   const [selectedAddress, setSelectedAddress] = useState(null)
+   const [paymentMethod, setPaymentMethod] = useState('cod')
+
+   useEffect(() => {
+      async function fetchAddresses() {
+         const res = await fetch('/api/addresses', { cache: 'no-store' })
+         const json = await res.json()
+         setAddresses(json)
+         if (json.length > 0) setSelectedAddress(json[0].id)
+      }
+      if (authenticated) fetchAddresses()
+   }, [authenticated])
+
+   function handlePlaceOrder() {
+      alert('Đặt hàng thành công! (Mock)')
+   }
+
    return (
-      <div className="min-h-screen py-12">
-         <div className="container mx-auto p-4">
-            <h1 className="text-3xl font-semibold mb-4">Privacy Policy</h1>
-
-            <p className="mb-4">
-               This Privacy Policy describes how Your E-commerce Store collects,
-               uses, and protects your personal information when you use our
-               website.
-            </p>
-
-            <h2 className="text-xl font-semibold mb-2">
-               1. Information We Collect
-            </h2>
-            <p className="mb-4">
-               We may collect personal information, such as your name, email
-               address, and shipping address, when you make a purchase on our
-               website.
-            </p>
-
-            <h2 className="text-xl font-semibold mb-2">
-               2. How We Use Your Information
-            </h2>
-            <p className="mb-4">
-               We use your personal information to process and fulfill your
-               orders, provide customer support, and send you updates about your
-               orders.
-            </p>
-
-            {/* Include more sections as needed for your specific privacy policy. */}
-
-            <h2 className="text-xl font-semibold mb-2">Contact Us</h2>
-            <p className="mb-4">
-               If you have any questions or concerns about our Privacy Policy,
-               please contact us at{' '}
-               <a href="mailto:contact@yourstore.com">contact@yourstore.com</a>.
-            </p>
+      <CartContextProvider>
+         <Heading title="Checkout" description="Xác nhận đơn hàng và thanh toán." />
+         <h2 className="font-semibold mb-2">Chọn địa chỉ giao hàng</h2>
+         {addresses.length === 0 ? (
+            <div>Bạn chưa có địa chỉ nào. <a href="/profile/addresses/new" className="underline">Thêm địa chỉ mới</a></div>
+         ) : (
+            <select
+               className="border rounded p-2"
+               value={selectedAddress || ''}
+               onChange={e => setSelectedAddress(e.target.value)}
+            >
+               {addresses.map(addr => (
+                  <option key={addr.id} value={addr.id}>
+                     {addr.address}, {addr.city} ({addr.phone})
+                  </option>
+               ))}
+            </select>
+         )}
+         <h2 className="font-semibold mb-2">Chọn phương thức thanh toán</h2>
+         <div className="flex gap-4">
+            {mockPaymentMethods.map(method => (
+               <label key={method.id} className="flex items-center gap-2">
+                  <input
+                     type="radio"
+                     name="paymentMethod"
+                     value={method.id}
+                     checked={paymentMethod === method.id}
+                     onChange={() => setPaymentMethod(method.id)}
+                  />
+                  {method.label}
+               </label>
+            ))}
          </div>
-      </div>
+         <h2 className="font-semibold mb-2">Sản phẩm trong đơn hàng</h2>
+         {cart?.items?.length > 0 ? (
+            <ul className="space-y-2">
+               {cart.items.map((item, idx) => (
+                  <li key={idx} className="flex justify-between border-b pb-1">
+                     <span>{item.product.title} x {item.count}</span>
+                     <span>${(item.product.price * item.count).toFixed(2)}</span>
+                  </li>
+               ))}
+            </ul>
+         ) : (
+            <div>Giỏ hàng trống.</div>
+         )}
+         <Receipt />
+      </CartContextProvider>
    )
 }
-
-export default PrivacyPolicy
