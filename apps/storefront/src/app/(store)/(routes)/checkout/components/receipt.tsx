@@ -3,14 +3,11 @@
 import { Separator } from '@/components/native/separator'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
-import { useAuthenticated } from '@/hooks/useAuthentication'
 import { isVariableValid } from '@/lib/utils'
 import { useCartContext } from '@/state/Cart'
-import Link from 'next/link'
 
-export function Receipt() {
-   const { authenticated } = useAuthenticated()
-   const { loading, cart, refreshCart, dispatchCart } = useCartContext()
+export function Receipt({ handlePlaceOrder }: { handlePlaceOrder: () => void }) {
+   const { loading, cart } = useCartContext()
 
    function calculatePayableCost() {
       let totalAmount = 0,
@@ -64,19 +61,15 @@ export function Receipt() {
          </CardContent>
          <Separator />
          <CardFooter>
-            <Link
-               href={authenticated ? '/checkout' : '/login'}
+            <Button
+               disabled={
+                  !isVariableValid(cart?.items) || cart['items'].length === 0
+               }
                className="w-full"
+               onClick={handlePlaceOrder}
             >
-               <Button
-                  disabled={
-                     !isVariableValid(cart?.items) || cart['items'].length === 0
-                  }
-                  className="w-full"
-               >
-                  Checkout
-               </Button>
-            </Link>
+               Place Order
+            </Button>
          </CardFooter>
       </Card>
    )

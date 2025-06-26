@@ -25,7 +25,7 @@ import {
 import { Separator } from '@/components/ui/separator'
 import type { ProductWithIncludes } from '@/types/prisma'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Category } from '@prisma/client'
+import { Category, Brand } from '@prisma/client'
 import { Trash } from 'lucide-react'
 import { useParams, useRouter } from 'next/navigation'
 import { useState } from 'react'
@@ -40,6 +40,7 @@ const formSchema = z.object({
    discount: z.coerce.number().min(0),
    stock: z.coerce.number().min(0),
    categoryId: z.string().min(1),
+   brandId: z.string().min(1),
    isFeatured: z.boolean().default(false).optional(),
    isAvailable: z.boolean().default(false).optional(),
 })
@@ -49,11 +50,13 @@ type ProductFormValues = z.infer<typeof formSchema>
 interface ProductFormProps {
    initialData: ProductWithIncludes | null
    categories: Category[]
+   brands: Brand[]
 }
 
 export const ProductForm: React.FC<ProductFormProps> = ({
    initialData,
    categories,
+   brands,
 }) => {
    const params = useParams()
    const router = useRouter()
@@ -69,9 +72,11 @@ export const ProductForm: React.FC<ProductFormProps> = ({
    const defaultValues = initialData
       ? {
          ...initialData,
+         images: initialData.images.map((img: any) => typeof img === 'string' ? img : img.url),
          price: parseFloat(String(initialData?.price.toFixed(2))),
          discount: parseFloat(String(initialData?.discount.toFixed(2))),
          categoryId: initialData.categories?.[0]?.id || '',
+         brandId: initialData.brand?.id || '',
       }
       : {
          title: '---',
@@ -83,6 +88,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
          categoryId: '',
          isFeatured: false,
          isAvailable: false,
+         brandId: '',
       }
 
    const form = useForm<ProductFormValues>({
@@ -93,7 +99,6 @@ export const ProductForm: React.FC<ProductFormProps> = ({
    const onSubmit = async (data: ProductFormValues) => {
       try {
          setLoading(true)
-
          if (initialData) {
             await fetch(`/api/products/${params.productId}`, {
                method: 'PATCH',
@@ -138,6 +143,9 @@ export const ProductForm: React.FC<ProductFormProps> = ({
       }
    }
 
+   console.log('data', form.getValues())
+   console.log('initialData', initialData)
+
    return (
       <>
          <AlertModal
@@ -173,18 +181,10 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                         <FormLabel>Images</FormLabel>
                         <FormControl>
                            <ImageUpload
-                              value={field.value.map((image) => image)}
+                              value={field.value}
                               disabled={loading}
-                              onChange={(url) =>
-                                 field.onChange([...field.value, { url }])
-                              }
-                              onRemove={(url) =>
-                                 field.onChange([
-                                    ...field.value.filter(
-                                       (current) => current !== url
-                                    ),
-                                 ])
-                              }
+                              onChange={(url) => field.onChange([...field.value, url])}
+                              onRemove={(url) => field.onChange(field.value.filter((current) => current !== url))}
                            />
                         </FormControl>
                         <FormMessage />
@@ -290,6 +290,38 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                                        value={category.id}
                                     >
                                        {category.title}
+                                    </SelectItem>
+                                 ))}
+                              </SelectContent>
+                           </Select>
+                           <FormMessage />
+                        </FormItem>
+                     )}
+                  />
+                  <FormField
+                     control={form.control}
+                     name="brandId"
+                     render={({ field }) => (
+                        <FormItem>
+                           <FormLabel>Brand</FormLabel>
+                           <Select
+                              disabled={loading}
+                              onValueChange={field.onChange}
+                              value={field.value}
+                              defaultValue={field.value}
+                           >
+                              <FormControl>
+                                 <SelectTrigger>
+                                    <SelectValue
+                                       defaultValue={field.value}
+                                       placeholder="Select a brand"
+                                    />
+                                 </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                 {brands.map((brand) => (
+                                    <SelectItem key={brand.id} value={brand.id}>
+                                       {brand.title}
                                     </SelectItem>
                                  ))}
                               </SelectContent>

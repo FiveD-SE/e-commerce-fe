@@ -6,8 +6,9 @@ import React, { createContext, useContext, useEffect, useState } from 'react'
 const CartContext = createContext({
    cart: null,
    loading: true,
-   refreshCart: () => {},
-   dispatchCart: (object) => {},
+   refreshCart: () => { },
+   dispatchCart: (object) => { },
+   clearCart: () => { },
 })
 
 export const useCartContext = () => {
@@ -37,6 +38,11 @@ export const CartContextProvider = ({ children }) => {
       setLoading(false)
    }
 
+   const clearCart = () => {
+      setCart({ items: [] })
+      writeLocalCart({ items: [] })
+   }
+
    useEffect(() => {
       if (isVariableValid(user)) {
          setCart(user?.cart)
@@ -50,7 +56,7 @@ export const CartContextProvider = ({ children }) => {
 
    return (
       <CartContext.Provider
-         value={{ cart, loading, refreshCart, dispatchCart }}
+         value={{ cart, loading, refreshCart, dispatchCart, clearCart }}
       >
          {children}
       </CartContext.Provider>

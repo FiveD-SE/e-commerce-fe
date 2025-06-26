@@ -52,5 +52,5 @@ interface OrdersTableProps {
 }
 
 export const OrdersTable: React.FC<OrdersTableProps> = ({ data }) => {
-   return <DataTable searchKey="products" columns={columns} data={data} />
+   return <DataTable columns={columns} data={data} />
 }
