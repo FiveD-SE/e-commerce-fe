@@ -99,29 +99,46 @@ export async function POST(req: Request) {
          },
       })
 
-      const owners = await prisma.owner.findMany()
-
-      await prisma.notification.createMany({
-         data: owners.map((owner) => ({
-            userId: owner.id,
-            content: `Order #${order.number} was created with a value of $${payable}.`,
-         })),
-      })
-
-      for (const owner of owners) {
-         await sendMail({
-            name: config.name,
-            to: owner.email,
-            subject: 'An order was created.',
-            html: await render(
-               Mail({
-                  id: order.id,
-                  payable: payable.toFixed(2),
-                  orderNum: order.number.toString(),
-               })
-            ),
+      // Tạo payment thành công mặc định, lấy provider đầu tiên
+      const provider = await prisma.paymentProvider.findFirst({ where: { isActive: true } })
+      if (provider) {
+         await prisma.payment.create({
+            data: {
+               status: 'Paid',
+               isSuccessful: true,
+               payable: order.payable,
+               refId: `MOCK-${order.id}-${Date.now()}`,
+               user: { connect: { id: userId } },
+               order: { connect: { id: order.id } },
+               provider: { connect: { id: provider.id } },
+            },
          })
       }
+
+      const owners = await prisma.owner.findMany()
+
+      // Chỉ tạo notification cho user đặt hàng
+      await prisma.notification.create({
+         data: {
+            userId: userId,
+            content: `Order #${order.number} was created with a value of $${payable}.`,
+         },
+      })
+
+      // for (const owner of owners) {
+      //    await sendMail({
+      //       name: config.name,
+      //       to: owner.email,
+      //       subject: 'An order was created.',
+      //       html: await render(
+      //          Mail({
+      //             id: order.id,
+      //             payable: payable.toFixed(2),
+      //             orderNum: order.number.toString(),
+      //          })
+      //       ),
+      //    })
+      // }
 
       return NextResponse.json(order)
    } catch (error) {

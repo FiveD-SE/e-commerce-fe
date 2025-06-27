@@ -15,6 +15,8 @@ export default async function DashboardPage() {
    const salesCount = await getSalesCount()
    const stockCount = await getStockCount()
 
+   console.log(graphRevenue)
+
    return (
       <div className="flex-col">
          <div className="flex-1 space-y-4 pt-4">

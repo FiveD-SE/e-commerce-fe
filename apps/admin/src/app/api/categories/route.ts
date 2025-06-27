@@ -11,14 +11,18 @@ export async function POST(req: Request) {
 
       const body = await req.json()
 
-      const { title, description, bannerId } = body
+      const { title, description } = body
 
       if (!title) {
          return new NextResponse('Name is required', { status: 400 })
       }
 
-      if (!bannerId) {
-         return new NextResponse('Banner ID is required', { status: 400 })
+      // if (!bannerId) {
+      //    return new NextResponse('Banner ID is required', { status: 400 })
+      // }
+
+      if (!description) {
+         return new NextResponse('Description is required', { status: 400 })
       }
 
       // Create a new category
@@ -26,11 +30,6 @@ export async function POST(req: Request) {
          data: {
             title,
             description,
-            banners: {
-               connect: {
-                  id: bannerId,
-               },
-            },
          },
       })
 

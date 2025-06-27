@@ -42,5 +42,5 @@ export const CategoriesClient: React.FC<CategoriesClientProps> = ({ data }) => {
    const params = useParams()
    const router = useRouter()
 
-   return <DataTable searchKey="title" columns={columns} data={data} />
+   return <DataTable columns={columns} data={data} />
 }

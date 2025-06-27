@@ -43,5 +43,5 @@ export const BannersClient: React.FC<BannerClientProps> = ({ data }) => {
    const params = useParams()
    const router = useRouter()
 
-   return <DataTable searchKey="label" columns={columns} data={data} />
+   return <DataTable columns={columns} data={data} />
 }

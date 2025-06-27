@@ -38,12 +38,10 @@ type CategoryFormValues = z.infer<typeof formSchema>
 
 interface CategoryFormProps {
    initialData: Category | null
-   banners: Banner[]
 }
 
 export const CategoryForm: React.FC<CategoryFormProps> = ({
    initialData,
-   banners,
 }) => {
    const params = useParams()
    const router = useRouter()
@@ -58,10 +56,15 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({
 
    const form = useForm<CategoryFormValues>({
       resolver: zodResolver(formSchema),
-      defaultValues: initialData || {
-         title: '',
-         description: '',
-      },
+      defaultValues: initialData
+         ? {
+            title: initialData.title,
+            description: initialData.description,
+         }
+         : {
+            title: null,
+            description: null,
+         },
    })
 
    const onSubmit = async (data: CategoryFormValues) => {
@@ -162,32 +165,14 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({
                      name="description"
                      render={({ field }) => (
                         <FormItem>
-                           <FormLabel>Banner</FormLabel>
-                           <Select
-                              disabled={loading}
-                              onValueChange={field.onChange}
-                              value={field.value}
-                              defaultValue={field.value}
-                           >
-                              <FormControl>
-                                 <SelectTrigger>
-                                    <SelectValue
-                                       defaultValue={field.value}
-                                       placeholder="Select a banner"
-                                    />
-                                 </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                 {banners.map((banner) => (
-                                    <SelectItem
-                                       key={banner.id}
-                                       value={banner.id}
-                                    >
-                                       {banner.label}
-                                    </SelectItem>
-                                 ))}
-                              </SelectContent>
-                           </Select>
+                           <FormLabel>Description</FormLabel>
+                           <FormControl>
+                              <Input
+                                 disabled={loading}
+                                 placeholder="Category description"
+                                 {...field}
+                              />
+                           </FormControl>
                            <FormMessage />
                         </FormItem>
                      )}

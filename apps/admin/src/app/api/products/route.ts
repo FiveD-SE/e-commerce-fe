@@ -9,11 +9,29 @@ export async function POST(req: Request) {
          return new NextResponse('Unauthorized', { status: 401 })
       }
 
-      const { data } = await req.json()
+      const { images, title, description, price, discount, categoryId, brandId } = await req.json()
 
-      const products = await prisma.product.findMany()
+      const product = await prisma.product.create({
+         data: {
+            images,
+            title,
+            description,
+            price,
+            discount,
+            categories: {
+               connect: {
+                  id: categoryId,
+               },
+            },
+            brand: {
+               connect: {
+                  id: brandId,
+               },
+            },
+         },
+      })
 
-      return NextResponse.json(products)
+      return NextResponse.json(product)
    } catch (error) {
       console.error('[PRODUCTS_POST]', error)
       return new NextResponse('Internal error', { status: 500 })
