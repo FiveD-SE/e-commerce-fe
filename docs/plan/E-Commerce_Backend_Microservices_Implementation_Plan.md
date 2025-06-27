@@ -77,7 +77,6 @@ Currently, your frontend implements 47+ API endpoints that need to be migrated:
 
 #### Week 2: Authentication & Security
 - [ ] **auth-service** with JWT tokens
-- [ ] OAuth2 integration (Google, Apple)
 - [ ] Security configurations across services
 
 ### Phase 2: Core Services Enhancement (Week 3-6)
@@ -120,7 +119,7 @@ Currently, your frontend implements 47+ API endpoints that need to be migrated:
 
 #### Week 8: Payment Service
 **Branch**: `feature/payment-service`
-- [ ] Zarinpal integration
+- [ ] PayOS integration
 - [ ] Payment processing
 - [ ] Payment status tracking
 - [ ] Refund handling
@@ -148,7 +147,6 @@ Currently, your frontend implements 47+ API endpoints that need to be migrated:
 **Branch**: `feature/auth-service`
 - [ ] **auth-service**: JWT token management
 - [ ] OTP phone/email authentication
-- [ ] OAuth2 integration (Google, Apple)
 - [ ] Session management
 - [ ] User authentication middleware
 
@@ -311,8 +309,6 @@ Authentication Flow:
 - GET /auth/logout
 - POST /auth/refresh-token
 - GET /auth/me (get current user)
-- POST /auth/oauth/google
-- POST /auth/oauth/apple
 ```
 
 ### 7. Notification Service (New)
