@@ -1,4 +1,4 @@
-import { getLocalCart, writeLocalCart } from '@/lib/cart'
+import { clearLocalCart, getLocalCart, writeLocalCart } from '@/lib/cart'
 import { isVariableValid } from '@/lib/utils'
 import { useUserContext } from '@/state/User'
 import React, { createContext, useContext, useEffect, useState } from 'react'
@@ -40,7 +40,7 @@ export const CartContextProvider = ({ children }) => {
 
    const clearCart = () => {
       setCart({ items: [] })
-      writeLocalCart({ items: [] })
+      clearLocalCart()
    }
 
    useEffect(() => {
@@ -48,7 +48,7 @@ export const CartContextProvider = ({ children }) => {
          setCart(user?.cart)
          writeLocalCart(user?.cart)
       }
-      if (!isVariableValid(getLocalCart())) writeLocalCart({ items: [] })
+      if (!isVariableValid(getLocalCart())) clearLocalCart()
       if (!isVariableValid(user)) setCart(getLocalCart())
 
       setLoading(false)

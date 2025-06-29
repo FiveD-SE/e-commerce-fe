@@ -27,3 +27,11 @@ export function getCountInCart({ cartItems, productId }) {
       return 0
    }
 }
+
+export function clearLocalCart() {
+   if (typeof window !== 'undefined' && window.localStorage) {
+      window.localStorage.setItem('Cart', JSON.stringify({ items: [] }))
+   } else {
+      console.error('localStorage is not available')
+   }
+}

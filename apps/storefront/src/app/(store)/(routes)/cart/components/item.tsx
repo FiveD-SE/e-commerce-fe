@@ -61,8 +61,7 @@ export const Item = ({ cartItem }) => {
                method: 'POST',
                body: JSON.stringify({
                   productId,
-                  count:
-                     getCountInCart({ cartItems: cart?.items, productId }) + 1,
+                  count: getCountInCart({ cartItems: cart?.items, productId }) + 1,
                }),
                cache: 'no-store',
                headers: {

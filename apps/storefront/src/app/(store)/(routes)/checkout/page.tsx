@@ -75,6 +75,10 @@ function CheckoutContent() {
             return
          }
 
+         if (authenticated) {
+            await fetch('/api/cart/clear', { method: 'POST' })
+         }
+
          toast.success('Order placed and payment successful!')
          clearCart()
          router.push('/profile/payments')
