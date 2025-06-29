@@ -143,9 +143,6 @@ export const ProductForm: React.FC<ProductFormProps> = ({
       }
    }
 
-   console.log('data', form.getValues())
-   console.log('initialData', initialData)
-
    return (
       <>
          <AlertModal

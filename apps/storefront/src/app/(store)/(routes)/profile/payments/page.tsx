@@ -14,9 +14,13 @@ const columns = [
 
 export default function PaymentsPage() {
     const [payments, setPayments] = useState([])
+
     useEffect(() => {
         async function fetchPayments() {
-            const res = await fetch('/api/payments', { cache: 'no-store' })
+            const res = await fetch('/api/payments', {
+                method: 'GET',
+                cache: 'no-store',
+            })
             const json = await res.json()
             setPayments(Array.isArray(json) ? json : [])
         }

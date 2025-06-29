@@ -10,6 +10,7 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@
 import { useRouter } from 'next/navigation'
 import { toast } from 'react-hot-toast'
 import Loading from '@/app/loading'
+import { Input } from '@/components/ui/input'
 
 const mockPaymentMethods = [
    { id: 'cod', label: 'Cash on Delivery' },
@@ -22,8 +23,11 @@ function CheckoutContent() {
    const [addresses, setAddresses] = useState([])
    const [selectedAddress, setSelectedAddress] = useState(null)
    const [paymentMethod, setPaymentMethod] = useState('cod')
+   const [discountCode, setDiscountCode] = useState('')
+   const [discountStatus, setDiscountStatus] = useState<'idle' | 'valid' | 'invalid' | 'checking'>('idle')
    const router = useRouter()
    const [loading, setLoading] = useState(false)
+   const [discountInfo, setDiscountInfo] = useState(null);
 
    useEffect(() => {
       async function fetchAddresses() {
@@ -35,25 +39,42 @@ function CheckoutContent() {
       if (authenticated) fetchAddresses()
    }, [authenticated])
 
+   async function validateDiscountCode() {
+      if (!discountCode) return
+      setDiscountStatus('checking')
+      try {
+         const res = await fetch(`/api/codes/validate?code=${encodeURIComponent(discountCode)}`)
+         const json = await res.json()
+         if (res.ok) {
+            setDiscountStatus('valid')
+            setDiscountInfo(json)
+         } else {
+            setDiscountStatus('invalid')
+         }
+      } catch {
+         setDiscountStatus('invalid')
+      }
+   }
+
    async function handlePlaceOrder() {
       try {
          setLoading(true)
-         // 1. Tạo order trước
+
          const orderRes = await fetch('/api/orders', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                addressId: selectedAddress,
-               discountCode: 'TECHFEST25',
+               discountCode: discountCode || '',
             }),
          })
+
          if (!orderRes.ok) {
             console.log(orderRes)
             toast.error('Failed to create order')
             return
          }
-         const order = await orderRes.json()
-         // 2. Không cần gọi tiếp /api/payments nữa!
+
          toast.success('Order placed and payment successful!')
          clearCart()
          router.push('/profile/payments')
@@ -69,7 +90,7 @@ function CheckoutContent() {
    }
 
    return (
-      <div className="mb-4 grid grid-cols-1 md:grid-cols-3 gap-3">
+      <div className="mb-4 grid grid-cols-1 md:grid-cols-2 gap-3">
          <div className="md:col-span-1 space-y-4">
             <Heading title="Checkout" description="Confirm your order and payment." />
             <h2 className="font-semibold mb-2">Select delivery address</h2>
@@ -114,13 +135,31 @@ function CheckoutContent() {
             ) : (
                <div>Your cart is empty.</div>
             )}
+            <div>
+               <label className="font-semibold mb-2 block">Discount code</label>
+               <div className="flex gap-2">
+                  <Input
+                     value={discountCode}
+                     onChange={e => { setDiscountCode(e.target.value); setDiscountStatus('idle') }}
+                     placeholder="Enter discount code"
+                     className="w-full"
+                  />
+                  <button
+                     type="button"
+                     className="px-4 py-2 rounded bg-white text-black"
+                     onClick={validateDiscountCode}
+                     disabled={!discountCode || discountStatus === 'checking'}
+                  >
+                     {discountStatus === 'checking' ? 'Checking...' : 'Apply'}
+                  </button>
+               </div>
+               {discountStatus === 'valid' && <div className="text-green-600 text-sm mt-1">Discount code applied!</div>}
+               {discountStatus === 'invalid' && <div className="text-red-600 text-sm mt-1">Invalid or expired code.</div>}
+            </div>
          </div>
-         <div className="md:col-span-1 space-y-4" />
          <div className="md:col-span-1 flex flex-col justify-between h-full min-h-[400px]">
             <div className="flex-1" />
-            <div>
-               <Receipt handlePlaceOrder={handlePlaceOrder} />
-            </div>
+            <Receipt handlePlaceOrder={handlePlaceOrder} discountInfo={discountInfo} />
          </div>
       </div>
    )

@@ -1,7 +1,7 @@
 import config from '@/config/site'
 import Mail from '@/emails/order_notification_owner'
 import prisma from '@/lib/prisma'
-import { sendMail } from '@packages/mail'
+import { sendMail } from '@packages/mail/src'
 import { render } from '@react-email/render'
 import { NextResponse } from 'next/server'
 
@@ -66,7 +66,7 @@ export async function POST(req: Request) {
          },
       })
 
-      const { tax, total, discount, payable } = calculateCosts({ cart })
+      const { tax, total, discount, payable } = await calculateCosts({ cart, discountCode })
 
       const order = await prisma.order.create({
          data: {
@@ -99,15 +99,21 @@ export async function POST(req: Request) {
          },
       })
 
-      // Tạo payment thành công mặc định, lấy provider đầu tiên
+      enum PaymentStatus {
+         Processing = 'Processing',
+         Paid = 'Paid',
+         Failed = 'Failed',
+         Denied = 'Denied',
+      }
+
       const provider = await prisma.paymentProvider.findFirst({ where: { isActive: true } })
       if (provider) {
          await prisma.payment.create({
             data: {
-               status: 'Paid',
-               isSuccessful: true,
+               status: PaymentStatus.Processing,
+               isSuccessful: false,
                payable: order.payable,
-               refId: `MOCK-${order.id}-${Date.now()}`,
+               refId: order.id.toString(),
                user: { connect: { id: userId } },
                order: { connect: { id: order.id } },
                provider: { connect: { id: provider.id } },
@@ -117,7 +123,6 @@ export async function POST(req: Request) {
 
       const owners = await prisma.owner.findMany()
 
-      // Chỉ tạo notification cho user đặt hàng
       await prisma.notification.create({
          data: {
             userId: userId,
@@ -125,20 +130,20 @@ export async function POST(req: Request) {
          },
       })
 
-      // for (const owner of owners) {
-      //    await sendMail({
-      //       name: config.name,
-      //       to: owner.email,
-      //       subject: 'An order was created.',
-      //       html: await render(
-      //          Mail({
-      //             id: order.id,
-      //             payable: payable.toFixed(2),
-      //             orderNum: order.number.toString(),
-      //          })
-      //       ),
-      //    })
-      // }
+      for (const owner of owners) {
+         await sendMail({
+            name: config.name,
+            to: owner.email,
+            subject: 'An order was created.',
+            html: await render(
+               Mail({
+                  id: order.id,
+                  payable: payable.toFixed(2),
+                  orderNum: order.number.toString(),
+               })
+            ),
+         })
+      }
 
       return NextResponse.json(order)
    } catch (error) {
@@ -147,7 +152,7 @@ export async function POST(req: Request) {
    }
 }
 
-function calculateCosts({ cart }) {
+async function calculateCosts({ cart, discountCode }) {
    let total = 0,
       discount = 0
 
@@ -156,7 +161,25 @@ function calculateCosts({ cart }) {
       discount += item?.count * item?.product?.discount
    }
 
-   const afterDiscount = total - discount
+   let codeDiscount = 0
+   if (discountCode) {
+      const discountInfo = await prisma.discountCode.findFirst({
+         where: {
+            code: discountCode,
+            stock: { gte: 1 },
+            startDate: { lte: new Date() },
+            endDate: { gte: new Date() },
+         },
+      })
+      if (discountInfo && discountInfo.percent) {
+         codeDiscount = Math.min(
+            (total - discount) * (discountInfo.percent / 100),
+            discountInfo.maxDiscountAmount || Infinity
+         )
+      }
+   }
+
+   const afterDiscount = total - discount - codeDiscount
    const tax = afterDiscount * 0.09
    const payable = afterDiscount + tax
 

@@ -50,8 +50,6 @@ export const CodeForm: React.FC<CodeFormProps> = ({ initialData }) => {
     const toastMessage = initialData ? 'Code updated.' : 'Code created.'
     const action = initialData ? 'Save changes' : 'Create'
 
-    console.log('initialData', initialData)
-
     const form = useForm<CodeFormValues>({
         resolver: zodResolver(formSchema),
         defaultValues: initialData
